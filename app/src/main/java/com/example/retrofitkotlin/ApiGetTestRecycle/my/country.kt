@@ -1,4 +1,4 @@
-package com.example.retrofitkotlin.ApiGetTestRecycle
+package com.example.retrofitkotlin.ApiGetTestRecycle.my
 
 data class country (
     val name:String,
