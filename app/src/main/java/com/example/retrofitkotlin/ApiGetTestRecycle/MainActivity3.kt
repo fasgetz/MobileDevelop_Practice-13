@@ -11,6 +11,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Room
+import androidx.room.Room.*
+import com.example.retrofitkotlin.ApiGetTestRecycle.db.appDataBase
+import com.example.retrofitkotlin.ApiGetTestRecycle.db.countryModel
 import com.example.retrofitkotlin.ApiGetTestRecycle.my.CountryAdapter
 import com.example.retrofitkotlin.ApiGetTestRecycle.my.MyService
 import com.example.retrofitkotlin.ApiGetTestRecycle.my.country
@@ -45,6 +49,8 @@ class MainActivity3 : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@MainActivity3)
             adapter = CountryAdapter(applicationContext, cuntries!!)
         }
+
+        countriesCount.setText(countries?.count().toString())
     }
 
     fun LoadCountries(view: View?) {
@@ -60,10 +66,10 @@ class MainActivity3 : AppCompatActivity() {
                     val api = retrofit.create(MyService::class.java)
                     api.GetAllData().enqueue(object :Callback<List<country>>{
                         override fun onResponse(call: Call<List<country>>, response: Response<List<country>>) {
-                            showData(response.body())
+
                             countries = response.body()
 
-                            countriesCount.setText(countries?.count().toString())
+                            showData(countries)
 
                             Toast.makeText(applicationContext, "${countries?.count().toString()} стран загружено с сервера", Toast.LENGTH_SHORT).show()
                         }
@@ -79,6 +85,109 @@ class MainActivity3 : AppCompatActivity() {
                 }
             }
         }
+
+    }
+
+
+    // Сохранение в бд
+    fun SaveDb(view: View?) {
+
+
+        // если страны загружены
+        if (countries?.count() != null) {
+
+            var countriesNew: ArrayList<countryModel>? = ArrayList<countryModel>()
+
+            countries?.toMutableList()?.forEach {
+                var model: countryModel = countryModel()
+                model.capital = it.capital
+                model.name = it.name
+                countriesNew?.add(model)
+            }
+
+
+            runBlocking {
+                launch(Dispatchers.Default) {
+                    try {
+                        val db = databaseBuilder(
+                            applicationContext,
+                            appDataBase::class.java, "appDataBase"
+                        ).build()
+
+                        var dao = db?.GetCountriesDao()
+
+                        // Удаляем из базы данных старые сущности
+                        dao?.removeAll()
+                        dao?.insertAll(countriesNew?.toList())
+                    }
+                    catch (ex: Exception) {
+                        val myToast = Toast.makeText(applicationContext, ex.message, Toast.LENGTH_LONG)
+                        myToast.show()
+                    }
+                }
+
+                Toast.makeText(applicationContext, "${countriesNew?.count().toString()} добавлено в БД", Toast.LENGTH_SHORT).show()
+            }
+
+        }
+        else {
+            Toast.makeText(applicationContext, "Страны не загружены для сохранения в бд", Toast.LENGTH_SHORT).show()
+        }
+
+
+    }
+
+    // Сохранение в бд
+    fun LoadOnDb(view: View?) {
+
+        // если страны не загружены, то загрузить
+        if (countries?.count() == null) {
+            var all: List<countryModel?>? = null
+
+
+            runBlocking {
+                launch(Dispatchers.Default) {
+                    try {
+                        val db = databaseBuilder(
+                            applicationContext,
+                            appDataBase::class.java, "appDataBase"
+                        ).build()
+
+                        var dao = db?.GetCountriesDao()
+
+                        // загружаем все сущности из бд
+                        all = dao?.all
+                    }
+                    catch (ex: Exception) {
+                        val myToast = Toast.makeText(applicationContext, ex.message, Toast.LENGTH_LONG)
+                        myToast.show()
+                    }
+                }
+
+            }
+
+
+
+
+            // После загрузки
+            var countriesNew: ArrayList<country>? = ArrayList()
+
+
+            all?.toMutableList()?.forEach {
+                var model = country(it?.name.toString(), it?.capital.toString())
+                countriesNew?.add(model)
+            }
+
+            countries = countriesNew?.toList()
+            Toast.makeText(applicationContext, "Стран загружено из базы данных ${countries?.count()}", Toast.LENGTH_SHORT).show()
+            showData(countries)
+
+
+        }
+        else {
+            Toast.makeText(applicationContext, "Страны уже загружены", Toast.LENGTH_SHORT).show()
+        }
+
 
     }
 
