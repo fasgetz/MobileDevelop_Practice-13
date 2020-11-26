@@ -63,7 +63,9 @@ class MainActivity3 : AppCompatActivity() {
                             showData(response.body())
                             countries = response.body()
 
-                            Toast.makeText(applicationContext, "${countries?.count().toString()} стран загружено", Toast.LENGTH_SHORT).show()
+                            countriesCount.setText(countries?.count().toString())
+
+                            Toast.makeText(applicationContext, "${countries?.count().toString()} стран загружено с сервера", Toast.LENGTH_SHORT).show()
                         }
 
                         override fun onFailure(call: Call<List<country>>, t: Throwable) {
