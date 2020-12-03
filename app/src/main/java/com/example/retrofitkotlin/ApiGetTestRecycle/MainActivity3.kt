@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,7 +42,35 @@ class MainActivity3 : AppCompatActivity() {
         setContentView(R.layout.activity_main3)
 
 
-        //RecyclerView.ItemAnimator.ItemHolderInfo
+        if (countries != null)
+            showData(countries);
+    }
+
+    override fun onSaveInstanceState(savedInstanceState: Bundle) {
+
+        var count = countries?.count()
+        if (count != null)
+            savedInstanceState.putBoolean("load", true);
+
+        super.onSaveInstanceState(savedInstanceState);
+
+/*        val myToast = Toast.makeText(this@MainActivity3, "save", Toast.LENGTH_SHORT)
+        myToast.show()*/
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+
+        var load: Boolean = savedInstanceState.getBoolean("load")
+        if (load == true)
+            loadDataFromDb();
+/*        val myToast = Toast.makeText(this@MainActivity3, "restore ${countries?.count()}", Toast.LENGTH_SHORT)
+        myToast.show()*/
+
+        //showData(countries);
+/*        var list = students!!.map { i -> i.infoStudent }
+        adapterList?.clear()
+        adapterList?.addAll(list!!)*/
     }
 
     private fun showData(cuntries: List<country>?) {
@@ -137,9 +166,8 @@ class MainActivity3 : AppCompatActivity() {
 
     }
 
-    // Сохранение в бд
-    fun LoadOnDb(view: View?) {
 
+    fun loadDataFromDb() {
         // если страны не загружены, то загрузить
         if (countries?.count() == null) {
             var all: List<countryModel?>? = null
@@ -179,7 +207,7 @@ class MainActivity3 : AppCompatActivity() {
             }
 
             countries = countriesNew?.toList()
-            Toast.makeText(applicationContext, "Стран загружено из базы данных ${countries?.count()}", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(applicationContext, "Стран загружено из базы данных ${countries?.count()}", Toast.LENGTH_SHORT).show()
             showData(countries)
 
 
@@ -188,6 +216,11 @@ class MainActivity3 : AppCompatActivity() {
             Toast.makeText(applicationContext, "Страны уже загружены", Toast.LENGTH_SHORT).show()
         }
 
+    }
+    // Загрузка из бд
+    fun LoadOnDb(view: View?) {
+
+        loadDataFromDb();
 
     }
 

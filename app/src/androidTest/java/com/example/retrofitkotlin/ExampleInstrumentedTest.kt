@@ -57,15 +57,24 @@ class ExampleInstrumentedTest {
 
         Espresso.onView(withId(R.id.list)).perform(ViewActions.click());
 
-
         Espresso.onView(withId(R.id.countryTV))
-            .check(ViewAssertions.matches(ViewMatchers.withText("Albania")))
+            .check(ViewAssertions.matches(ViewMatchers.withText("Algeria")))
 
         Espresso.onView(withId(R.id.regionTV))
-            .check(ViewAssertions.matches(ViewMatchers.withText("Europe")))
+            .check(ViewAssertions.matches(ViewMatchers.withText("Africa")))
 
         Espresso.onView(withId(R.id.countsTV))
-            .check(ViewAssertions.matches(ViewMatchers.withText("2886026")))
+            .check(ViewAssertions.matches(ViewMatchers.withText("40400000")))
 
+    }
+
+    @Test
+    public fun LoadFromDBCountries() {
+        Espresso.onView(withId(R.id.button3)).perform(ViewActions.click());
+
+        Thread.sleep(1000)
+
+        Espresso.onView(withId(R.id.countriesCount))
+            .check(ViewAssertions.matches(ViewMatchers.withText("250")))
     }
 }
